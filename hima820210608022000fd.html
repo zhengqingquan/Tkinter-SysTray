@@ -1,0 +1,491 @@
+
+ 
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"> 
+    <head>   
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />   
+        <title>
+            WorldScienceDataBank        </title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link href="/wsdb_osndisk/favicon.ico" type="image/x-icon" rel="icon" /><link href="/wsdb_osndisk/favicon.ico" type="image/x-icon" rel="shortcut icon" /><script text="javascript">
+    var downloadTitle = "ファイルダウンロード";
+    var downloadBtn = "ダウンロード";
+    var downloadOk = "ダウンロード";
+    var downloadCancel = "キャンセル";
+    var downloadClose = "閉じる";
+    var readdirErr = "現在のフォルダの読み込みに失敗しました";
+    var nofileErr = "ファイル/フォルダが存在しません";
+    var downloadPopup = "アイコンをクリックするとダウンロードします";
+    var MSG_REQUIRE = "必須項目です。";
+    var MSG_CHECK = "いずれかを選択してください。";
+    var MSG_MATCH = "一致しません。";
+    var MSG_SPACE = "半角/全角スペースを使用することはできません。";
+    var MSG_CHAR = "次の文字は使用できません。";
+    var MSG_HEAD = "先頭に次の文字は使用できません。";
+    var MSG_NUM = "文字以上で入力してください";
+    var MSG_UNDER_NUM = "文字以下で入力してください";
+    var MSG_PARENT = "親フォルダに移動";
+    var MSG_CURRENT = "現在のフォルダを選択";
+    var MSG_NEXT = "次のページを表示";
+    var MSG_MAX_CONDITIONS = "検索条件に指定できる単語は5つまでです。";
+    var SHARE_FILE_TYPE = "1";
+    var PAGING_STR = "ページ";
+    var SORT_TITLE = "表示順:";
+    var SORT_BY_NAME = "ファイル名昇順";
+    var SORT_BY_NAME_DESC = "ファイル名降順";
+    var SORT_BY_NEWER = "更新日時の新しい順";
+    var SORT_BY_OLDER = "更新日時の古い順";
+    var SORT_BY_BIGGER = "サイズの大きい順";
+    var SORT_BY_SMALLER = "サイズの小さい順";
+    var SEL_SIZE = "サイズ: %self";
+    var SEL_MTIME = "更新日時: %self";
+    var SEL_TOTALSIZE = "サイズ: %self";
+    var SEL_TOTALITEMS = "%s個の項目を選択";
+    var CURRENT_NAME = ".__current";
+    var HIMA_ABOUT_VIEW_URL = "以下のURLにアクセスすると、同じフォルダ、同じ言語の画面がそのまま表示されます。";
+</script>
+<link rel="stylesheet" type="text/css" href="/wsdb_osndisk/css/himawari8/lib/jquery-ui.min.css" /><link rel="stylesheet" type="text/css" href="/wsdb_osndisk/css/himawari8/lib/font-awesome.min.css" /><link rel="stylesheet" type="text/css" href="/wsdb_osndisk/css/himawari8/base_himawari8.css" /><link rel="stylesheet" type="text/css" href="/wsdb_osndisk/css/himawari8/search_field.css" /><link rel="stylesheet" type="text/css" href="/wsdb_osndisk/css/himawari8/search_result.css" /><link rel="stylesheet" type="text/css" href="/wsdb_osndisk/css/himawari8/operation_menu.css" /><link rel="stylesheet" type="text/css" href="/wsdb_osndisk/css/himawari8/search_menu.css" /><link rel="stylesheet" type="text/css" href="/wsdb_osndisk/css/himawari8/himawari8_mobile.css" /><link rel="stylesheet" type="text/css" href="/wsdb_osndisk/css/datatables/jquery.dataTables.min.css" /><link rel="stylesheet" type="text/css" href="/wsdb_osndisk/css/pickadate/default.css" /><link rel="stylesheet" type="text/css" href="/wsdb_osndisk/css/pickadate/default.date.css" /><script type="text/javascript" src="/wsdb_osndisk/js/himawari8/lib/jquery.js"></script><script type="text/javascript" src="/wsdb_osndisk/js/himawari8/lib/jquery-ui.min.js"></script><script type="text/javascript" src="/wsdb_osndisk/js/himawari8/lib/jquery.dataTables.min.js"></script><script type="text/javascript" src="/wsdb_osndisk/js/agentChecker.js"></script><script type="text/javascript" src="/wsdb_osndisk/js/utils.js"></script><script type="text/javascript" src="/wsdb_osndisk/js/useWebStorage.js"></script><script type="text/javascript" src="/wsdb_osndisk/js/setAjaxCsrfToken.js"></script><script type="text/javascript" src="/wsdb_osndisk/js/shareDirDownload/setAjaxHashUrl.js"></script><script type="text/javascript" src="/wsdb_osndisk/js/himawari8/wsdb.himawari8-locale.js"></script><script type="text/javascript" src="/wsdb_osndisk/js/himawari8/wsdb.himawari8-fontsize.js"></script><script type="text/javascript" src="/wsdb_osndisk/js/himawari8/wsdb.himawari8-models.js"></script><script type="text/javascript" src="/wsdb_osndisk/js/himawari8/wsdb.himawari8-view.js"></script><script type="text/javascript" src="/wsdb_osndisk/js/jquery/pickadate/picker.js"></script><script type="text/javascript" src="/wsdb_osndisk/js/jquery/pickadate/picker.date.js"></script><script type="text/javascript" src="/wsdb_osndisk/js/jquery/pickadate/ja_JP.js"></script>    </head>
+    <body data-lang="ja">
+      <div id="container">
+        <div id="header"><!--
+<div id="title"><h1>ひまわり８号ダウンロードWeb</h1></div>
+-->
+<div id="title"><img src="../img/himawari8_logo.png"></div>
+<div id="header_menu">
+      <div id="help" class="transition">ヘルプ</div>
+    <div id="fontbox">
+    <div id="cg_label">文字サイズ</div>
+    <div id="cg_box">
+    <div id="font_size">
+      <div id="small" font-size="0" class="changeBtn">M</div>
+      <div id="large"  font-size="1"class="changeBtn">L</div>
+      <div id="large2" font-size="2" class="changeBtn">LL</div>
+<!--
+      <div id="small" class="changeBtn">S</div>
+      <div id="normal" class="changeBtn">Default</div>
+      <div id="large" class="changeBtn">L</div>
+-->
+    </div>
+    </div>
+    <div class="clear"></div>
+  </div>
+  <div class="clear"></div>
+</div>
+<div class="clear"></div>
+</div>
+        <div id="contents"><script>
+  var BASE_DIR = "/osn-disk/webuser/wsdb/share_directory/bDw2maKV";
+  var TOP_URL = "/wsdb_osndisk";
+  var FIXED_TOKEN = "f3d43342dde8e3e2820fbf60470f13f882aacd57";
+  var HASH_URL = "bDw2maKV";
+  var LANG = "ja";
+</script>
+
+<div id="contents-top">
+  <!-- 検索設定フィールド表示 -->
+    <div id="search_config">
+    <div id="data_tab">
+      <div id="data_im" class="on">画像</div>
+      <div id="data_mo">動画</div>
+      <div class="clear"></div>
+    </div>
+    <div id="view_url" class="fa fa-share-square-o fa-lg">
+<!--
+        検索条件の<br>URLを表示-->
+    </div>
+    <div id = "search_field">
+      <!-- データ種類選択 -->
+          <!-- データ種別選択 -->
+    <div id="data_type">
+      <div id="data_type_im">
+        <p class="search_label_title"><span class="fa fa-picture-o fa-lg"></span>データの種類</p>
+                <div id="data_select_box">
+                                                    <div id="select-fd_im" class="select_box">
+                  <input type="checkbox" name="data_type" id="fd_im" value="fd_im">
+                  <p>
+                    地球全図                  </p>
+                  <div class="clear"></div>
+                </div>
+                              <div id="select-jp_im" class="select_box">
+                  <input type="checkbox" name="data_type" id="jp_im" value="jp_im">
+                  <p>
+                    日本列島                  </p>
+                  <div class="clear"></div>
+                </div>
+                              <div id="select-r3_im" class="select_box">
+                  <input type="checkbox" name="data_type" id="r3_im" value="r3_im">
+                  <p>
+                    <i class="fa fa-bullseye fa-lg"></i>機動観測域                  </p>
+                  <div class="clear"></div>
+                </div>
+                                              <div class="clear"></div>
+        </div>
+      </div>
+      <div id="data_type_mo">
+        <p class="search_label_title"><img src="../img/icon/icon_movie.svg"><span>データの種類</span></p>
+                <div id="data_select_box">
+                                                    <div id="select-fd_mo" class="select_box">
+                  <input type="checkbox" name="data_type" id="fd_mo" value="fd_mo">
+                  <p>
+                    地球全図                  </p>
+                  <div class="clear"></div>
+                </div>
+                              <div id="select-jp_mo" class="select_box">
+                  <input type="checkbox" name="data_type" id="jp_mo" value="jp_mo">
+                  <p>
+                    日本列島                  </p>
+                  <div class="clear"></div>
+                </div>
+                              <div id="select-r3_mo" class="select_box">
+                  <input type="checkbox" name="data_type" id="r3_mo" value="r3_mo">
+                  <p>
+                    <i class="fa fa-bullseye fa-lg"></i>機動観測域                  </p>
+                  <div class="clear"></div>
+                </div>
+                              <div id="select-ev_mo" class="select_box">
+                  <input type="checkbox" name="data_type" id="ev_mo" value="ev_mo">
+                  <p>
+                    <i class="fa fa-crop fa-lg"></i>イベント                  </p>
+                  <div class="clear"></div>
+                </div>
+                                              <div class="clear"></div>
+        </div>
+      </div>
+    </div>
+
+      <!-- 検索期間選択 -->
+          <!-- 検索期間指定 -->
+    <div id="data_period">
+      <p class="search_label_title">検索期間(JST)</p>
+      <div id="period_length_box">
+        <p>期間選択:</p>
+        <select id="period_length">
+          <option value="none">なし</option>
+          <option value="0_minutes" class="data_im">0分</option>
+          <option value="10_minutes" class="data_im">10分</option>
+          <option value="30_minutes" class="data_im">30分</option>
+          <option value="60_minutes" class="data_im">1時間</option>
+          <option value="180_minutes" class="data_im">3時間</option>
+          <option value="360_minutes" class="data_im">6時間</option>
+          <option value="540_minutes" class="data_im">9時間</option>
+          <option value="720_minutes" class="data_im">12時間</option>
+          <option value="1440_minutes" >1日</option>
+          <option value="4320_minutes" >3日</option>
+          <option value="10080_minutes" >1週間</option>
+        </select>
+        <div class="clear"></div>
+      </div>
+      <div id="period_select_box">
+        <div id="start_date" class="date_box">
+          <input id="start_day" class="select_day" type="text" placeholder="select date">
+          <div class="select_hour_field">
+            <select id="start_hour" class="select_hour" type="text">
+                              <option value="0">00</option>
+                              <option value="1">01</option>
+                              <option value="2">02</option>
+                              <option value="3">03</option>
+                              <option value="4">04</option>
+                              <option value="5">05</option>
+                              <option value="6">06</option>
+                              <option value="7">07</option>
+                              <option value="8">08</option>
+                              <option value="9">09</option>
+                              <option value="10">10</option>
+                              <option value="11">11</option>
+                              <option value="12">12</option>
+                              <option value="13">13</option>
+                              <option value="14">14</option>
+                              <option value="15">15</option>
+                              <option value="16">16</option>
+                              <option value="17">17</option>
+                              <option value="18">18</option>
+                              <option value="19">19</option>
+                              <option value="20">20</option>
+                              <option value="21">21</option>
+                              <option value="22">22</option>
+                              <option value="23">23</option>
+                          </select>
+            <span class="time_name">:</span>
+          </div>
+          <div class="select_min_field">
+            <select id="start_min" class="select_min" type="text">
+                            <option value="0" str-val="00:00">00:00</option>
+                            <option value="1" str-val="02:30">02:30</option>
+                            <option value="2" str-val="05:00">05:00</option>
+                            <option value="3" str-val="07:30">07:30</option>
+                            <option value="4" str-val="10:00">10:00</option>
+                            <option value="5" str-val="12:30">12:30</option>
+                            <option value="6" str-val="15:00">15:00</option>
+                            <option value="7" str-val="17:30">17:30</option>
+                            <option value="8" str-val="20:00">20:00</option>
+                            <option value="9" str-val="22:30">22:30</option>
+                            <option value="10" str-val="25:00">25:00</option>
+                            <option value="11" str-val="27:30">27:30</option>
+                            <option value="12" str-val="30:00">30:00</option>
+                            <option value="13" str-val="32:30">32:30</option>
+                            <option value="14" str-val="35:00">35:00</option>
+                            <option value="15" str-val="37:30">37:30</option>
+                            <option value="16" str-val="40:00">40:00</option>
+                            <option value="17" str-val="42:30">42:30</option>
+                            <option value="18" str-val="45:00">45:00</option>
+                            <option value="19" str-val="47:30">47:30</option>
+                            <option value="20" str-val="50:00">50:00</option>
+                            <option value="21" str-val="52:30">52:30</option>
+                            <option value="22" str-val="55:00">55:00</option>
+                            <option value="23" str-val="57:30">57:30</option>
+                          </select>
+          </div>
+          <div class="clear"></div>
+        </div>
+        <div id="tilde_date">&sim;</div>
+        <div id="end_date" class="date_box">
+          <input id="end_day" class="select_day" type="text" placeholder="select date">
+          <div class="select_hour_field">
+            <select id="end_hour" class="select_hour" type="text">
+                              <option value="0">00</option>
+                              <option value="1">01</option>
+                              <option value="2">02</option>
+                              <option value="3">03</option>
+                              <option value="4">04</option>
+                              <option value="5">05</option>
+                              <option value="6">06</option>
+                              <option value="7">07</option>
+                              <option value="8">08</option>
+                              <option value="9">09</option>
+                              <option value="10">10</option>
+                              <option value="11">11</option>
+                              <option value="12">12</option>
+                              <option value="13">13</option>
+                              <option value="14">14</option>
+                              <option value="15">15</option>
+                              <option value="16">16</option>
+                              <option value="17">17</option>
+                              <option value="18">18</option>
+                              <option value="19">19</option>
+                              <option value="20">20</option>
+                              <option value="21">21</option>
+                              <option value="22">22</option>
+                              <option value="23">23</option>
+                          </select>
+            <span class="time_name">:</span>
+          </div>
+          <div class="select_min_field">
+            <select id="end_min" class="select_min" type="text">
+                            <option value="0" str-val="00:00">00:00</option>
+                            <option value="1" str-val="02:30">02:30</option>
+                            <option value="2" str-val="05:00">05:00</option>
+                            <option value="3" str-val="07:30">07:30</option>
+                            <option value="4" str-val="10:00">10:00</option>
+                            <option value="5" str-val="12:30">12:30</option>
+                            <option value="6" str-val="15:00">15:00</option>
+                            <option value="7" str-val="17:30">17:30</option>
+                            <option value="8" str-val="20:00">20:00</option>
+                            <option value="9" str-val="22:30">22:30</option>
+                            <option value="10" str-val="25:00">25:00</option>
+                            <option value="11" str-val="27:30">27:30</option>
+                            <option value="12" str-val="30:00">30:00</option>
+                            <option value="13" str-val="32:30">32:30</option>
+                            <option value="14" str-val="35:00">35:00</option>
+                            <option value="15" str-val="37:30">37:30</option>
+                            <option value="16" str-val="40:00">40:00</option>
+                            <option value="17" str-val="42:30">42:30</option>
+                            <option value="18" str-val="45:00">45:00</option>
+                            <option value="19" str-val="47:30">47:30</option>
+                            <option value="20" str-val="50:00">50:00</option>
+                            <option value="21" str-val="52:30">52:30</option>
+                            <option value="22" str-val="55:00">55:00</option>
+                            <option value="23" str-val="57:30">57:30</option>
+                          </select>
+          </div>
+          <div class="clear"></div>
+        </div>
+        <input id="dummy_focus" class="transition" type="text">
+        <div class="clear"></div>
+      </div>
+    </div>
+
+      <!-- 検索ボタン -->
+          <div id="data_search">
+      <div id="search_btn" class="enabled">
+        検索開始      </div>
+      <div id="srch_cancel_btn">
+        検索キャンセル      </div>
+<!--
+      <div id="view_url">
+        検索条件の<br>URLを表示      </div>
+-->
+      <div id="srch_msg">
+        <div id="srch_progressbar">
+          <div id="srch_running_msg" class="srch_msg">
+          </div>
+          <div id="srch_complete_msg" class="srch_msg">
+            検索が完了しました          </div>
+          <div id="srch_canceling_msg" class="srch_msg">
+            <span class="blink">検索キャンセル中...</span>          </div>
+          <div id="srch_canceled_msg" class="srch_msg">
+            検索をキャンセルしました          </div>
+        </div>
+      </div>
+    </div>
+      <div class="clear"></div>
+    </div>
+  </div>
+</div>
+<div id="contents-middle">
+  <!-- 操作ボタン表示 -->
+  <div id="ope_menu" class="ope_menu">
+    <!--
+<div id="download_btn" class="dl_btn">
+  ダウンロード</div>
+<div id="view_url">
+  検索条件の<br>URLを表示</div>
+
+<div id="open_viewer">
+  Viewer起動</div>
+
+<div class="clear"></div>
+-->
+  </div>
+  <div id="srch_menu">
+    <!--
+<div id="srch_msg">
+  <div id="srch_progressbar">
+    <div id="srch_running_msg" class="srch_msg">
+    </div>
+    <div id="srch_complete_msg" class="srch_msg">
+      検索が完了しました    </div>
+    <div id="srch_canceling_msg" class="srch_msg">
+      <span class="blink">検索キャンセル中...</span>    </div>
+    <div id="srch_canceled_msg" class="srch_msg">
+      検索をキャンセルしました    </div>
+  </div>
+</div>
+<div id="srch_cancel_btn">
+  検索キャンセル</div>
+-->
+  </div>
+  <div class="clear"></div>
+</div>
+<div id="contents-bottom">
+  <!-- 検索結果表示 -->
+      <div id="selected_info_box">
+      <div id="selected_info">
+        <div id="t_file_num_label" class="info_label">総ファイル数 : </div>
+        <div id="t_file_num" class="selected_info_val">0</div>
+        <div id="t_file_size_label" class="info_label">合計サイズ : </div>
+        <div id="t_size_bar" class="selected_info_val">
+          <div id="t_file_size">0 B</div>
+        </div>
+        <div id="t_arc_time" class="selected_info_val">
+          <div id="t_arc_label" class="selected_info_val">
+            ダウンロード開始までの所要時間の目安          </div>
+<!--
+          <div id="t_arc_bar">
+-->
+            <div id="t_time_val_0" class="t_time_val">0秒～5秒</div>
+            <div id="t_time_val_1" class="t_time_val">30秒～1.5分</div>
+            <div id="t_time_val_2" class="t_time_val">1.5分～3分</div>
+            <div id="t_time_val_3" class="t_time_val">3分～5分</div>
+            <div id="t_time_val_4" class="t_time_val">5分～7分</div>
+            <div id="t_time_val_5" class="t_time_val">合計サイズが2048MBを超えています</div>
+<!--
+          </div>
+-->
+        </div>
+        <div class="clear"></div>
+      </div>
+    </div>
+    <div id="thead_box">
+      <div id="thead_box_inner">
+        <table>
+          <thead></thead>
+        </table>
+      </div>
+    </div>
+    <div id="result_table_box">
+      <div id="data_im_table_box" class="table_box">
+        <table id="data_im_table" class="result_table display stripe hover" cellspacing="0" width="100%">
+          <thead>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+        <div class="empty_msg_box">検索条件に該当するデータがありませんでした。<br><ul><li>検索期間を長くしてもう一度検索してください。</li><li>最新のデータは現在時刻から約30分後にダウンロードできるようになります。サイエンスクラウドの利用状況によっては30分よりも遅れることがあります。</li><li>気象庁システムや情報通信研究機構ネットワークのメンテナンス、トラブル等によりデータ提供が停止することがあります。</li></ul></div>
+      </div>
+      <div id="data_mo_table_box" class="table_box">
+        <table id="data_mo_table" class="result_table display stripe hover" cellspacing="0" width="100%">
+<!--
+          <thead>
+          </thead>
+-->
+          <tbody>
+          </tbody>
+        </table>
+        <div class="empty_msg_box">検索条件に該当するデータがありませんでした。<br><ul><li>検索期間を長くしてもう一度検索してください。</li><li>最新のデータは現在時刻から約30分後にダウンロードできるようになります。サイエンスクラウドの利用状況によっては30分よりも遅れることがあります。</li><li>気象庁システムや情報通信研究機構ネットワークのメンテナンス、トラブル等によりデータ提供が停止することがあります。</li></ul></div>
+      </div>
+    </div>
+    <div id="dl_box">
+      <div id="download_btn2" class="dl_btn">
+        ダウンロード      </div>
+    </div>
+    <div>
+      <form action="/wsdb_osndisk/fileSearch/download" id="download_params" method="post" accept-charset="utf-8"><div style="display:none;"><input type="hidden" name="_method" value="POST"/></div><input type="hidden" name="data[FileSearch][is_compress]" value="false" id="FileSearchIsCompress"/><input type="hidden" name="data[FileSearch][fixedToken]" id="fixedToken" value="f3d43342dde8e3e2820fbf60470f13f882aacd57"/><input type="hidden" name="data[FileSearch][hashUrl]" id="hashUrl" value="bDw2maKV"/><input type="hidden" name="action" value="dir_download_dl"></input></form>      <div id="hidden_param" class="hidden">
+        <div id="searching_msg">検索しています...</div>
+        <!--<div id="empty_msg">検索条件に該当するデータがありませんでした。<br><ul><li>検索期間を長くしてもう一度検索してください。</li><li>最新のデータは現在時刻から約30分後にダウンロードできるようになります。サイエンスクラウドの利用状況によっては30分よりも遅れることがあります。</li><li>気象庁システムや情報通信研究機構ネットワークのメンテナンス、トラブル等によりデータ提供が停止することがあります。</li></ul></div>-->
+      </div>
+    </div>
+</div>
+
+<div id="dialog_download" style="display:none;">
+  <div id="dl_msg">
+    <div id="dl_running_msg">ダウンロードの準備中です。<br>完了するまでお待ちください。</div>
+    <div id="dl_complete_msg">ダウンロードの準備が完了しました。<br>まもなくダウンロードが開始されます。</div>
+  </div>
+  <div id="dl_progress">
+    <div id="progress_val">
+      <div id="progress_val_current">0 B</div>
+      <div id="progress_val_middle"> / </div>
+      <div id="progress_val_max"></div>
+      <div class="clear"></div>
+    </div>
+  </div>
+  <div class="hidden">
+    <div id="dl_dialog_title">ダウンロード</div>
+    <div id="dl_cancel">キャンセル</div>
+  </div>
+</div>
+<div id="dialog_view_url">
+  <p id="view_url_field"><a href="javascript:void(0);"></a></p>
+  <div class="hidden">
+    <div id="vu_dialog_title">検索条件のURL</div>
+    <div id="vu_close">閉じる</div>
+  </div>
+</div>
+<div id="dialog_viewer"></div>
+
+</div>
+        <div id="footer"><hr id="foot-line">
+<div id="footer_left">
+  <div id="sc_logo_box">
+    <a href="https://sc-web.nict.go.jp/" target="_blank"><img src="/wsdb_osndisk/img/logo_nict.png" class="sc_logo" alt="" /></a>  </div>
+</div>
+<div id="footer_right">
+    <div id="language">
+    Language:<select name="data[select_lang]" id="select_lang">
+<option value="ja" selected="selected">Japanese</option>
+<option value="en">English</option>
+</select>  </div>
+</div>
+<div class="clear">
+</div>
+<div id="footer_center">
+  <p id="copyright">
+    Copyright(C) NICT ScienceCloud. All rights reserved.  </p>
+</div>
+
+</div>
+      </div>
+
+    </body> 
+</html> 
