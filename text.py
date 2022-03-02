@@ -1,9 +1,16 @@
+"""
+用tkinter创建的窗口默认是不会在系统托盘（状态栏）设置图标的。当我们最小化的时候也只是在任务栏里最小化。也叫做用户提示通知区域
+我们需要在系统托盘添加图标，点击图标时显示窗口，最小化的时候关闭窗口。
+用户提示通知区域是一个窗口，它有属于自己的句柄。也就是说，当我们点击用户提示区的图标时会传入一个鼠标点击的消息。
+系统需要知道你点击了哪个图标，并执行响应的回调函数。这也就是我们点击显示窗口的过程。
+而最小化我们可能只需要修改回调函数就行了。
+"""
 import win32api, win32con, win32gui_struct, win32gui
 import os, tkinter as tk
 
 
 class SysTrayIcon(object):
-    '''SysTrayIcon类用于显示任务栏图标'''
+    """SysTrayIcon类用于显示任务栏图标"""
     QUIT = 'QUIT'
     SPECIAL_ACTIONS = [QUIT]
     FIRST_ID = 5320
@@ -21,8 +28,8 @@ class SysTrayIcon(object):
         """
         s.icon = icon
         s.hover_text = hover_text
-        s.on_quit = on_quit
-        s.root = tk_window
+        s.on_quit = on_quit # 把退出的调用传入。
+        s.root = tk_window # 把窗口自身传入。
 
         menu_options = menu_options + (('退出', None, s.QUIT),)
         s._next_action_id = s.FIRST_ID
@@ -35,17 +42,18 @@ class SysTrayIcon(object):
         s.window_class_name = window_class_name or "SysTrayIconPy"
 
         # 参考：https://baike.baidu.com/item/RegisterWindowMessage/877164
+        # https://blog.csdn.net/qq_36568418/article/details/80391432
         message_map = {win32gui.RegisterWindowMessage("TaskbarCreated"): s.restart,  # 获得窗口对象的消息
-                       win32con.WM_DESTROY: s.destroy,
-                       win32con.WM_COMMAND: s.command,
-                       win32con.WM_USER + 20: s.notify, }
+                       win32con.WM_DESTROY: s.destroy, # 退出相关
+                       win32con.WM_COMMAND: s.command, # 菜单相关
+                       win32con.WM_USER + 20: s.notify, } # 这个是由用户定义，用来指定对托盘图标的动作，做出的回调函数
         # 注册窗口类。
         # 参考：https://blog.csdn.net/qq_31243065/article/details/83513795
         # https://docs.microsoft.com/zh-cn/windows/win32/winmsg/window-classes
         # https://docs.microsoft.com/zh-cn/windows/win32/api/winuser/nf-winuser-registerclassa
         # 窗口类是一组属性，系统使用它们作为模板来创建窗口。 每个窗口都是窗口类的成员。
         # wc是WNDCLASS
-        wc = win32gui.WNDCLASS()  # 实例化窗口类，这个类会被用于注册窗口。
+        wc = win32gui.WNDCLASS()  # 实例化窗口类，这个类会被用于注册窗口。相当于实例化一个结构体，这结构体被用于注册窗口。
         wc.hInstance = win32gui.GetModuleHandle(None)  # 窗口类所在模块的实例句柄
         wc.lpszClassName = s.window_class_name  # 窗口类的名称
         wc.style = win32con.CS_VREDRAW | win32con.CS_HREDRAW  # 类风格
@@ -53,6 +61,9 @@ class SysTrayIcon(object):
         wc.hbrBackground = win32con.COLOR_WINDOW  # 窗口类的背景画刷
         # 参考：https://docs.microsoft.com/en-us/windows/win32/api/winuser/nc-winuser-wndproc
         # 参考：https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-callwindowproca
+        # https://baike.baidu.com/item/lpfnWndProc/8717371
+        # 参考：https://blog.csdn.net/m0_56708264/article/details/122263286
+        # 这个的意思是，针对不同的消息传递不同的回调函数。
         wc.lpfnWndProc = message_map  # 定义窗口处理函数。也可以指定wndproc.
         s.classAtom = win32gui.RegisterClass(wc)  # 注册窗口
 
@@ -66,6 +77,9 @@ class SysTrayIcon(object):
         handle_instance = win32gui.GetModuleHandle(None)  # 创建窗口，None返回调用进程本身的句柄。
         style = win32con.WS_OVERLAPPED | win32con.WS_SYSMENU  # 指定创建窗口的风格
         # 创建窗口，返回句柄
+        # 注册窗口后才能创建窗口。
+        # 参考：https://www.cnblogs.com/csqtech/p/5573809.html
+        # https://www.cnblogs.com/jinxiang1224/p/8468362.html
         s.hwnd = win32gui.CreateWindow(s.classAtom,
                                        s.window_class_name,
                                        style,
@@ -77,6 +91,9 @@ class SysTrayIcon(object):
         s.notify_id = None
         s.refresh(title='软件已后台！', msg='点击重新打开', time=500)
 
+        # 当窗口创建以后，使用win32gui.PumpMessages()进入无限消息循环，处理窗口消息。
+        # 窗口消息首先传递给WndProc，在WndProc中可以定义相应消息的处理过程。
+        # 参考：https://blog.csdn.net/MosesAaron/article/details/71407727
         win32gui.PumpMessages()
 
     def refresh(s, title='', msg='', time=500):
@@ -113,7 +130,14 @@ class SysTrayIcon(object):
             message = win32gui.NIM_MODIFY  # 修改图标
         else:
             message = win32gui.NIM_ADD  # 增加一个图标到托盘区
-
+        """
+        NIF_ICON：指定hIcon是有效的，（这里设定自定义系统托盘图标必须的）
+        NIF_MESSAGE：指定uCallbackMessage是有效的，用于程序接收来自托盘图标的消息，需要自定义一个消息。
+        NIF_TIP：指定szTip是有效的，功能是当鼠标移动到图标上时，显示提示信息。
+        NIF_INFO：显示气泡通知。
+        """
+        # 参考：https://blog.csdn.net/say_high/article/details/11092961
+        # https://docs.microsoft.com/en-us/windows/win32/api/shellapi/ns-shellapi-notifyicondataa
         s.notify_id = (s.hwnd,  # 接收Windows消息的窗口句柄。
                        0,  # 句柄、托盘图标ID
                        win32gui.NIF_ICON | win32gui.NIF_MESSAGE | win32gui.NIF_TIP | win32gui.NIF_INFO,
@@ -168,6 +192,7 @@ class SysTrayIcon(object):
     def restart(s, hwnd, msg, wparam, lparam):
         s.refresh()
 
+    #
     def destroy(s, hwnd=None, msg=None, wparam=None, lparam=None, exit=1):
         nid = (s.hwnd, 0)
         win32gui.Shell_NotifyIcon(win32gui.NIM_DELETE, nid)
@@ -177,13 +202,14 @@ class SysTrayIcon(object):
         else:
             s.root.deiconify()  # 显示tk窗口
 
+    # 根据通知进行不同的处理。
     def notify(s, hwnd, msg, wparam, lparam):
         """鼠标事件"""
         if lparam == win32con.WM_LBUTTONDBLCLK:  # 双击左键
             pass
-        elif lparam == win32con.WM_RBUTTONUP:  # 右键弹起
+        elif lparam == win32con.WM_RBUTTONUP:  # 右键弹起，显示菜单
             s.show_menu()
-        elif lparam == win32con.WM_LBUTTONUP:  # 左键弹起
+        elif lparam == win32con.WM_LBUTTONUP:  # 左键弹起，成员方法，销毁自己的状态栏图标
             s.destroy(exit=0)
         return True
 
@@ -237,6 +263,7 @@ class SysTrayIcon(object):
         id = win32gui.LOWORD(wparam)
         s.execute_menu_option(id)
 
+    # 右键菜单中的退出。
     def execute_menu_option(s, id):
         menu_action = s.menu_actions_by_id[id]
         if menu_action == s.QUIT:
@@ -260,6 +287,17 @@ class _Main:  # 调用SysTrayIcon的Demo窗口
         # 2. 意思是在应用程序中不再显示该组件的时候，例如调用 grid_remove() 方法。
         # 窗口最小化判断，可以说是调用最重要的一步
         # 匿名函数lambda
+        # iconic：最小化；normal：正常显示；zoomed：最大化。
+        # 参考：https://blog.csdn.net/weixin_39529302/article/details/111736228
+        """
+        def event():
+            s.Hidden_window()
+            if s.root.state() == 'iconic':
+                
+            else
+                False
+        
+        """
         s.root.bind("<Unmap>", lambda event: s.Hidden_window() if s.root.state() == 'iconic' else False)  # 在窗口最小化的时候调用
         # 参考：https://blog.csdn.net/weixin_39967072/article/details/109960087
         s.root.protocol('WM_DELETE_WINDOW', s.exit)  # 点击Tk窗口关闭时直接调用s.exit，不使用默认关闭
@@ -297,8 +335,10 @@ class _Main:  # 调用SysTrayIcon的Demo窗口
             on_quit=s.exit,  # 退出调用
             tk_window=s.root,  # Tk窗口
         )
+        # 激活
         s.SysTrayIcon.activation()
 
+    # tkinter关闭的时候默认会调用destroy()，这里多添加了一个print()函数
     def exit(s, _sysTrayIcon=None):
         s.root.destroy()
         print('exit...')
