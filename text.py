@@ -28,14 +28,14 @@ class SysTrayIcon(object):
         """
         s.icon = icon
         s.hover_text = hover_text
-        s.on_quit = on_quit # 把退出的调用传入。
-        s.root = tk_window # 把窗口自身传入。
+        s.on_quit = on_quit  # 把退出的调用传入。
+        s.root = tk_window  # 把窗口自身传入。
 
         menu_options = menu_options + (('退出', None, s.QUIT),)
         s._next_action_id = s.FIRST_ID
-        s.menu_actions_by_id = set()
+        s.menu_actions_by_id = set()  # set() 函数创建一个无序不重复元素集，可进行关系测试，删除重复数据，还可以计算交集、差集、并集等。
         s.menu_options = s._add_ids_to_menu_options(list(menu_options))
-        s.menu_actions_by_id = dict(s.menu_actions_by_id)
+        s.menu_actions_by_id = dict(s.menu_actions_by_id)  # dict() 函数用于创建一个字典。
         del s._next_action_id
 
         s.default_menu_index = (default_menu_index or 0)
@@ -43,10 +43,11 @@ class SysTrayIcon(object):
 
         # 参考：https://baike.baidu.com/item/RegisterWindowMessage/877164
         # https://blog.csdn.net/qq_36568418/article/details/80391432
+        # https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerwindowmessagea
         message_map = {win32gui.RegisterWindowMessage("TaskbarCreated"): s.restart,  # 获得窗口对象的消息
-                       win32con.WM_DESTROY: s.destroy, # 退出相关
-                       win32con.WM_COMMAND: s.command, # 菜单相关
-                       win32con.WM_USER + 20: s.notify, } # 这个是由用户定义，用来指定对托盘图标的动作，做出的回调函数
+                       win32con.WM_DESTROY: s.destroy,  # 退出相关
+                       win32con.WM_COMMAND: s.command,  # 菜单相关
+                       win32con.WM_USER + 20: s.notify, }  # 这个是由用户定义，用来指定对托盘图标的动作，做出的回调函数
         # 注册窗口类。
         # 参考：https://blog.csdn.net/qq_31243065/article/details/83513795
         # https://docs.microsoft.com/zh-cn/windows/win32/winmsg/window-classes
@@ -56,6 +57,7 @@ class SysTrayIcon(object):
         wc = win32gui.WNDCLASS()  # 实例化窗口类，这个类会被用于注册窗口。相当于实例化一个结构体，这结构体被用于注册窗口。
         wc.hInstance = win32gui.GetModuleHandle(None)  # 窗口类所在模块的实例句柄
         wc.lpszClassName = s.window_class_name  # 窗口类的名称
+        # https://docs.microsoft.com/en-us/windows/win32/winmsg/window-class-styles
         wc.style = win32con.CS_VREDRAW | win32con.CS_HREDRAW  # 类风格
         wc.hCursor = win32gui.LoadCursor(0, win32con.IDC_ARROW)  # 窗口类的光标
         wc.hbrBackground = win32con.COLOR_WINDOW  # 窗口类的背景画刷
@@ -159,7 +161,7 @@ class SysTrayIcon(object):
         # 参考：https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-createpopupmenu
         # 如果函数成功，则返回值是新创建的菜单的句柄。
         # 如果函数失败，则返回值为 NULL。
-        menu = win32gui.CreatePopupMenu()
+        menu = win32gui.CreatePopupMenu()  # 返回值是创建的弹出菜单的句柄
         s.create_menu(menu, s.menu_options)
 
         # 参考：https://zhuanlan.zhihu.com/p/264135461
@@ -174,10 +176,13 @@ class SysTrayIcon(object):
                                 None)
         win32gui.PostMessage(s.hwnd, win32con.WM_NULL, 0, 0)
 
+    # 给菜单项添加ID
     def _add_ids_to_menu_options(s, menu_options):
         result = []
         for menu_option in menu_options:
+            # 菜单项文本、菜单项图标、菜单项的回调函数。
             option_text, option_icon, option_action = menu_option
+            # 如果回调函数是可以调用的，或回调函数在字典中。则添加id和回调函数到字典中。
             if callable(option_action) or option_action in s.SPECIAL_ACTIONS:
                 s.menu_actions_by_id.add((s._next_action_id, option_action))
                 result.append(menu_option + (s._next_action_id,))
@@ -213,8 +218,12 @@ class SysTrayIcon(object):
             s.destroy(exit=0)
         return True
 
+    # 创建弹出菜单，参数是弹出菜单的句柄和形式。
+    # 参考：https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-createpopupmenu
     def create_menu(s, menu, menu_options):
         for option_text, option_icon, option_action, option_id in menu_options[::-1]:
+            print(option_icon)
+            print(option_id)
             if option_icon:
                 option_icon = s.prep_menu_icon(option_icon)
 
@@ -222,8 +231,8 @@ class SysTrayIcon(object):
                 item, extras = win32gui_struct.PackMENUITEMINFO(text=option_text,
                                                                 hbmpItem=option_icon,
                                                                 wID=option_id)
-                win32gui.InsertMenuItem(menu, 0, 1, item)
-            else:
+                win32gui.InsertMenuItem(menu, 0, 1, item)  # 插入或追加菜单项
+            else: # 这部分应该是子菜单的
                 submenu = win32gui.CreatePopupMenu()
                 s.create_menu(submenu, option_action)
                 item, extras = win32gui_struct.PackMENUITEMINFO(text=option_text,
@@ -308,7 +317,7 @@ class _Main:  # 调用SysTrayIcon的Demo窗口
     def switch_icon(s, _sysTrayIcon, icon='D:\\2.ico'):
         # 点击右键菜单项目会传递SysTrayIcon自身给引用的函数，所以这里的_sysTrayIcon = s.sysTrayIcon
         # 只是一个改图标的例子，不需要的可以删除此函数
-        _sysTrayIcon.icon = icon
+        _sysTrayIcon._icon = icon
         _sysTrayIcon.refresh()
 
         # 气泡提示的例子

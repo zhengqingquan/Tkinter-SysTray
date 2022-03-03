@@ -1,13 +1,13 @@
 import win32api, win32con, win32gui_struct, win32gui
 import tkinter as tk
 
-
+# https://blog.csdn.net/maqunfi/article/details/82943209
 # 参考：https://blog.csdn.net/m0_56708264/article/details/122263286
 # win32gui.CreateWindow()
 
 # win32gui.CreatePopupMenu()
 
-# 可能需要两个进程
+# 可能需要两个进程。主进程退出的时候，必须等待子进程全部退出。当前进程和系统托盘的进程应该是同级别的。
 class MainUI(object):
     def __init__(self):
         self.root = tk.Tk()  # 创建tk窗口。
