@@ -1,5 +1,9 @@
-# 输入为一个字节数，返回合适单位的字符串。
 def byte_conversion(byte):
+    """
+    输入为一个字节数，返回合适单位的字符串。
+    :param byte:
+    :return:
+    """
     try:
         if byte < 1024:  # 小于1KB以“0000B”的格式返回字符串
             return f'{byte}B'
@@ -13,8 +17,12 @@ def byte_conversion(byte):
         return "未知大小"
 
 
-# 输入一个时间数，单位为秒，返回合适单位的字符串
 def second_conversion(seconds):
+    """
+    输入一个时间数，单位为秒，返回合适单位的字符串。
+    :param seconds:
+    :return:
+    """
     try:
         if seconds < 10:  # 小于10秒，以“0.00s”的格式返回字符串
             return '{:.2f}s'.format(seconds)

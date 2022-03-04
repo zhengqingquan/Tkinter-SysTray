@@ -281,6 +281,8 @@ class SysTrayIcon(object):
             menu_action(s)
 
 
+
+
 class _Main:  # 调用SysTrayIcon的Demo窗口
     def __init__(s):
         s.SysTrayIcon = None  # 判断是否打开系统托盘图标

@@ -1,3 +1,5 @@
+import tkinter
+
 import win32api, win32con, win32gui_struct, win32gui
 
 
@@ -21,7 +23,7 @@ class SysTray(object):
         wc.style = win32con.CS_VREDRAW | win32con.CS_HREDRAW  # 1|2 按位或，wc.style为3。窗口类风格
         wc.hCursor = win32gui.LoadCursor(0, win32con.IDC_ARROW)  # 窗口类的光标
         wc.hbrBackground = win32con.COLOR_WINDOW  # 窗口类的背景画刷
-        # wc.lpfnWndProc = message_map  # 定义窗口处理函数。也可以指定wndproc.
+        wc.lpfnWndProc = message_map  # 定义窗口处理函数。也可以指定wndproc.
         self.classAtom = win32gui.RegisterClass(wc)  # 注册窗口
 
         style = win32con.WS_OVERLAPPED | win32con.WS_SYSMENU  # 0|524288 指定创建窗口的风格
@@ -54,7 +56,9 @@ class SysTray(object):
                           win32gui.NIIF_INFO  # 提示用到的图标
                           )
         win32gui.Shell_NotifyIcon(message, self.notify_id)
-        win32gui.PumpMessages()
+        # 参考：https://blog.csdn.net/MosesAaron/article/details/71407727
+        # 当窗口创建以后，使用PumpMessages()来让窗口进入消息列表的循环中。否则程序会中止。类似于mainloop()。
+        # win32gui.PumpMessages()
 
     def PumpMessages(self):
         pass
@@ -86,7 +90,8 @@ class SysTray(object):
         nid = (self.hwnd, 0)
         print(self.hwnd)
         win32gui.Shell_NotifyIcon(win32gui.NIM_DELETE, nid)
-        win32gui.PostQuitMessage(0)  # 终止应用程序。
+        # 参考：https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-postquitmessage
+        # win32gui.PostQuitMessage(0)  # 终止应用程序。
         print("销毁")
         # nid = (self.hwnd, 0)
         # win32gui.Shell_NotifyIcon(win32gui.NIM_DELETE, nid)  # 状态栏删除一个图标
@@ -147,7 +152,7 @@ class SysTray(object):
                                                         wID=option_id)
         win32gui.InsertMenuItem(menu, 0, 1, item)  # 四个参数，菜单项的句柄、位置、位置、指向 MENUITEMINFO 结构的指针，该结构包含有关新菜单项的信息。
         pos = win32gui.GetCursorPos()  # 获取鼠标当前位置的坐标
-        win32gui.SetForegroundWindow(self.hwnd)
+        win32gui.SetForegroundWindow(self.hwnd) # 将窗口置顶。放到前台。
         win32gui.TrackPopupMenu(menu,
                                 win32con.TPM_LEFTALIGN,
                                 pos[0],
@@ -157,10 +162,21 @@ class SysTray(object):
                                 None)
         win32gui.PostMessage(self.hwnd, win32con.WM_NULL, 0, 0)
 
+    # 析构函数
+    # 在跳出作用域的时候会执行一次
+    def __del__(self):
+        # win32gui.PostQuitMessage(0)  # 终止应用程序。
+        print("析构函数")
+
 
 if __name__ == '__main__':
     sys_tray = SysTray()
-    sys_tray.PumpMessages()
+    root = tkinter.Tk()
+    root.mainloop()
+    win32gui.Shell_NotifyIcon(win32gui.NIM_DELETE, sys_tray.notify_id)
+    del sys_tray
+    # RefreshTrayIcon()
+    # sys_tray.PumpMessages()
 
     # import win32con, win32gui
     # import pywintypes

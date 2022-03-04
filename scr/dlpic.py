@@ -10,6 +10,11 @@ from scr.tool import second_conversion, byte_conversion
 from folder import create_folder
 
 
+# class PicCompleteDlClass(object):
+#     def __init__(self, picture):
+#         self.picture = picture
+
+
 def dl_pic_complete():
     # 打开会话
     requester = requests.Session()  # 打开一个请求会话
