@@ -16,7 +16,7 @@ class SysTrayCls(object):
                        }
 
         window_class = win32gui.WNDCLASS()  # 实例化窗口类，这个类会被用于注册窗口。
-        window_class.hInstance = win32gui.GetModuleHandle(None)  # 窗口类所在模块的实例句柄
+        window_class.hInstance = win32gui.GetModuleHandle(None)  # 窗口类所在的调用进程句柄
         window_class.lpszClassName = self.window_class_name  # 窗口类的名称
         window_class.style = win32con.CS_VREDRAW | win32con.CS_HREDRAW  # 1|2 按位或，window_class.style为3。窗口类风格
         window_class.hCursor = win32gui.LoadCursor(0, win32con.IDC_ARROW)  # 窗口类的光标
@@ -50,6 +50,7 @@ class SysTrayCls(object):
                           win32gui.NIIF_INFO  # 提示用到的图标
                           )
         win32gui.Shell_NotifyIcon(win32gui.NIM_ADD, self.notify_id)
+
         # win32gui.PumpMessages()  # 进入消息循环，处理窗口信息
 
     def notify(self, hwnd, msg, wparam, lparam):
